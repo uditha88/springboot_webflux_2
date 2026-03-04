@@ -16,11 +16,11 @@ services:
   webflux_2:
     image: uditha/spring_webflux_2:latest
     ports:
-      - "8082:8081" # Makes http://127.0.0.1:8082 available in local. No Nginx used
+      - "8082:8082" # Makes http://127.0.0.1:8082 available in local. No Nginx used
       # since this MS to be used as an internal one, use the above just to test the functionalities.
       # else remove the above expose as well
     environment:
-      - SERVER_PORT=8081
+      - SERVER_PORT=8082
     # - "443:8081" # production port number
     networks:
       - monitoring-net
