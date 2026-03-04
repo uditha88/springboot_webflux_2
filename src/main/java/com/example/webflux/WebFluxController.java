@@ -30,8 +30,14 @@ public class WebFluxController {
         @GetMapping("/writeDeveloper")
         public Mono<String> writeDeveloper() {
                 String message = "Uditha - " + Instant.now().toString();
-                kafkaTemplate.send("developer", message);
-                return Mono.just("sent: " + message);
+                try {
+                        // block until send is acknowledged to ensure message is persisted
+                        kafkaTemplate.send("developer", message).get();
+                        kafkaTemplate.flush();
+                        return Mono.just("sent: " + message);
+                } catch (Exception e) {
+                        return Mono.just("error sending: " + e.getMessage());
+                }
         }
 
         @GetMapping("/readTopics")
@@ -52,7 +58,8 @@ public class WebFluxController {
                 consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
                 consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
                 consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-                consumerProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 10); // Limit messages per topic
+                consumerProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 50); // Limit messages per topic
+                consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
                 try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerProps)) {
                         for (String topic : topicNames) {
@@ -64,13 +71,17 @@ public class WebFluxController {
                                 consumer.subscribe(Collections.singletonList(topic));
                                 List<String> messages = new ArrayList<>();
 
-                                // Poll for messages with timeout
+                                // Ensure we read from the beginning of the topic's partitions
+                                consumer.poll(Duration.ofMillis(100)); // trigger partition assignment
+                                if (!consumer.assignment().isEmpty()) {
+                                        consumer.seekToBeginning(consumer.assignment());
+                                }
+
+                                // Poll for messages with timeout (try a few times)
                                 int pollCount = 0;
-                                while (messages.size() < 10 && pollCount < 3) {
-                                        for (ConsumerRecord<String, String> record : consumer
-                                                        .poll(Duration.ofSeconds(1))) {
-                                                messages.add(record.value());
-                                        }
+                                while (messages.size() < 50 && pollCount < 5) {
+                                        consumer.poll(Duration.ofSeconds(1))
+                                                        .forEach(record -> messages.add(record.value()));
                                         pollCount++;
                                 }
 
