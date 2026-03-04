@@ -39,9 +39,9 @@ public class WebFluxController implements ErrorController {
 
             Flux f = Mono.delay(Duration.ofSeconds(5))
                             .thenMany(Flux.just(
-                                            new User("uditha", "uditha@uditha.com"),
-                                            new User("madumal", "madumal@madumal.com"),
-                                            new User("perera", "perera@perera.com")));
+                                            new User("uditha 2", "uditha@uditha.com2"),
+                                            new User("madumal 2", "madumal@madumal.com2"),
+                                            new User("perera 2", "perera@perera.com2")));
             return f;
     }
 
