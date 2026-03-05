@@ -18,7 +18,9 @@ services:
     ports:
       - "8082:8082" # Makes http://127.0.0.1:8082 available in local. No Nginx used
       # since this MS to be used as an internal one, use the above just to test the functionalities.
-      # else remove the above expose as well
+      # else remove the above expose as well. one service will identify this app by servicename:port
+      # where port is springboot app running port. neither one espose above or found in 'Docker' file. (which just a documentaion)
+      # Sometimes you might see "EXPOSE" in docker-compose file. it's again just documentation.
     environment:
       - SERVER_PORT=8082
     # - "443:8081" # production port number

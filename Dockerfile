@@ -17,5 +17,6 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8081
+# the above is just documentation. no use
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

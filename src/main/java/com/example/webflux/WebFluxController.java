@@ -29,7 +29,7 @@ public class WebFluxController {
 
         @GetMapping("/writeDeveloper")
         public Mono<String> writeDeveloper() {
-                String message = "Uditha - " + Instant.now().toString();
+                String message = "Uditha 3 - " + Instant.now().toString();
                 try {
                         // block until send is acknowledged to ensure message is persisted
                         kafkaTemplate.send("developer", message).get();
