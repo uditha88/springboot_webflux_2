@@ -1,6 +1,8 @@
 package com.example.webflux;
 
 import com.example.webflux.domain.TopicMessage;
+import com.example.webflux.domain.User;
+
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -10,6 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -91,5 +94,16 @@ public class WebFluxController {
                 }
 
                 return result;
+        }
+
+        @GetMapping("/getUsersFlux2")
+        public Flux<User> getUsersFlux2() throws InterruptedException {
+
+                Flux f = Mono.delay(Duration.ofSeconds(5))
+                                .thenMany(Flux.just(
+                                                new User("uditha", "uditha@uditha.com"),
+                                                new User("madumal", "madumal@madumal.com"),
+                                                new User("perera", "perera@perera.com")));
+                return f;
         }
 }
